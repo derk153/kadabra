@@ -106,7 +106,7 @@ defmodule Kadabra.ConnectionPool do
 
   def handle_info({:EXIT, _pid, {:ssl_error, _}}, state) do
     Logger.warning(
-      'TLS client: In state connection received SERVER ALERT: Fatal - Certificate Expired'
+      "TLS client: In state connection received SERVER ALERT: Fatal - Certificate Expired"
     )
 
     {:noreply, state}
@@ -135,6 +135,8 @@ defmodule Kadabra.ConnectionPool do
   defp dispatch_events(state) do
     {to_dispatch, rest} = Enum.split(state.events, state.pending_demand)
     new_pending = state.pending_demand - Enum.count(to_dispatch)
+
+    Logger.info("kadabra pending: #{new_pending}; rest events: #{length(rest)}")
 
     GenServer.cast(state.connection, {:request, to_dispatch})
     %{state | pending_demand: new_pending, events: rest}
